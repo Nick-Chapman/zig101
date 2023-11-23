@@ -1,9 +1,9 @@
 
 top: run-first
 
-run-%: %
+run-%: %.exe
 	@ echo 'Running example: $*'
-	@ ./$*
+	@ ./$^
 
-first: first.zig
-	zig build-exe $^
+%.exe: %.zig
+	zig build-exe $^ ; mv $* $@
