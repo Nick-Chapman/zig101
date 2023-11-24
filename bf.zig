@@ -1,27 +1,31 @@
 const std = @import("std");
 const print = std.debug.print;
+const os = std.os;
 
-pub fn main() void {
-    //const prog = "[-]>,[>,]<[.<]";
-    //const input = "HELLO";
+const string = []const u8;
+
+pub fn main() !void {
+    const filename = std.mem.span(os.argv[1]);
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    var allocator = arena.allocator();
     const input = "";
-    const prog =
-        \\ >++++++++++>+>+[
-        \\     [+++++[>++++++++<-]>.<++++++[>--------<-]+<<<]>.>>[
-        \\         [-]<[>+<-]>>[<<+>+>-]<[>+<-[>+<-[>+<-[>+<-[>+<-[>+<-
-        \\             [>+<-[>+<-[>+<-[>[-]>+>+<<<-[>+<-]]]]]]]]]]]+>>>
-        \\     ]<<<
-        \\ ]
-    ;
+    const prog = try contentsFile(allocator, filename);
     run(prog, input);
 }
 
+fn contentsFile(allocator: std.mem.Allocator, filename: string) !string {
+    const max_file_size = 100000;
+    const file = try std.fs.cwd().openFile(filename, .{});
+    defer file.close();
+    return file.reader().readAllAlloc(
+        allocator,
+        max_file_size,
+    );
+}
+
 fn run(prog: []const u8, input: []const u8) void {
-    //print("whole prog:'{s}'.\n", .{prog});
     const proglen = prog.len;
-    // for (prog, 0..) |c, i| {
-    //     print("char:'{d}={c}'.\n", .{ i, c });
-    // }
     const memsize = 30000;
     //var mem: [memsize]u8 = undefined; // 0xaa = 170
     var mem = [_]u8{0} ** memsize;
@@ -30,8 +34,18 @@ fn run(prog: []const u8, input: []const u8) void {
     var ip: u16 = 0;
     while (pc < proglen) {
         const op = prog[pc];
-        //print("pc={d}, mp={d}: '{c}'\n", .{ pc, mp, op });
         switch (op) {
+            '+' => mem[mp] +%= 1,
+            '-' => mem[mp] -%= 1,
+            '.' => put(mem[mp]),
+            ',' => {
+                if (ip >= input.len) {
+                    mem[mp] = 0;
+                } else {
+                    mem[mp] = input[ip];
+                    ip += 1;
+                }
+            },
             '<' => {
                 mp -= 1;
                 if (mp < 0) {
@@ -43,23 +57,6 @@ fn run(prog: []const u8, input: []const u8) void {
                 if (mp >= memsize) {
                     unreachable;
                 }
-            },
-            '+' => {
-                mem[mp] +%= 1;
-            },
-            '-' => {
-                mem[mp] -%= 1;
-            },
-            ',' => {
-                if (ip >= input.len) {
-                    mem[mp] = 0;
-                } else {
-                    mem[mp] = input[ip];
-                    ip += 1;
-                }
-            },
-            '.' => {
-                put(mem[mp]);
             },
             '[' => {
                 if (mem[mp] == 0) {
@@ -90,6 +87,5 @@ fn run(prog: []const u8, input: []const u8) void {
 }
 
 fn put(x: u8) void {
-    //print("PUT: {d} = '{c}'\n", .{ x, x });
     print("{c}", .{x});
 }
