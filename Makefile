@@ -1,7 +1,8 @@
 
-top: run-bf
+top: run-arith
 
-args = ../bf/b/collatz.b
+args =
+#args = ../bf/b/collatz.b
 #args = ../bf/b/fib.b
 #args = ../bf/b/mandelbrot.b
 
