@@ -1,15 +1,18 @@
 
 top: run-arith
 
-args =
-#args = ../bf/b/collatz.b
-#args = ../bf/b/fib.b
-#args = ../bf/b/mandelbrot.b
+exes: $(patsubst src/%.zig, _build/%, $(wildcard src/*))
 
-run-%: %.exe
-	@ echo 'Running example: $^ $(args)'
-	@ ./$^ $(args)
+all:  _build $(patsubst src/%.zig, _build/%, $(wildcard src/*))
+
+args = ../bf/b/mandelbrot.b
+
+run-%: _build _build/%
+	@ echo 'Running example: $@ $(args)'
+	@ _build/$* $(args)
 
 .PRECIOUS: %.exe
-%.exe: %.zig
-	zig build-exe $^ ; mv $* $@
+_build/%: src/%.zig
+	zig build-exe $^ ; mv $*.o $* _build
+
+_build: ; @mkdir -p $@

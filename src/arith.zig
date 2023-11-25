@@ -4,7 +4,7 @@ const print = std.debug.print;
 const allocator = std.heap.page_allocator;
 
 pub fn main() void {
-    const e = makeFibExample(10).*;
+    const e = makeFibExample(11).*;
     print("eval -> {d}\n", .{eval(e)});
 }
 
