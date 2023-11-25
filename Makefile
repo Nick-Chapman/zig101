@@ -1,5 +1,5 @@
 
-top: run-arith
+top: run-aoc22-1
 
 exes: $(patsubst src/%.zig, _build/%, $(wildcard src/*))
 
